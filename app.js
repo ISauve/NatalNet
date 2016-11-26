@@ -8,17 +8,16 @@ const TWILIO_ACCOUNT_SID = 'AC54baa8e971fdca04f235b4c225b2d6ce';
 var twilio = require('twilio');
 var client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 var cronJob = require('cron').CronJob;
-var frequency = '0 18 * * 6'; // Every saturday at 6:00pm
+var frequency = '15 18 * * 6';  // Every saturday at 6:00pm
 var numbers = ['+17806555108', '+1 289-924-1315', '+1 647-290-0836'];
+var responses = ['Welcome!', 'Wilkommen!', 'Bienvenue!'];
 
-var textJob = new cronJob( frequency, function(){
-
+var textJob = new cronJob( frequency, function() {
     for( var i = 0; i < numbers.length; i++ ) {
-
         client.sendMessage({
             to: numbers[i],
             from: TWILIO_NUMBER,
-            body: 'Bison!'
+            body: "Guess what... it's 6:15"
         }, function (err, data) {
             if (!err) {
                 console.log(data.from);
@@ -27,8 +26,6 @@ var textJob = new cronJob( frequency, function(){
         });
     }
 }, null, true);
-
-
 
 
 var express = require('express'),
@@ -50,11 +47,15 @@ var server = app.listen(process.env.PORT || 3000, function () {
 
 // tell express what to do when the /message route is requested
 app.post('/message', function (req, res) {
-
-    console.log("Received a request!");
-
     var resp = new twilio.TwimlResponse();
-    resp.message('f u man');
+
+    var messageRecieved = req.body.Body.trim().toLowerCase();
+
+    if ( messageRecieved.includes('subscribe') ) {
+         resp.message('Thanks for subscribing!');
+    } else {
+        resp.message(".... subscribe plz");
+    }
 
     res.setHeader('Content-Type', 'text/xml');
     res.end( resp.toString() );
