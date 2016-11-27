@@ -1,5 +1,5 @@
 {
-  "name": "makequality",
+  "name": "NatalNet",
   "version": "1.0.0",
   "description": "Web service for assisting in lowering infant mortality rate in Bangladesh.",
   "main": "app.js",
