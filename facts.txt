@@ -1,3 +1,9 @@
+{
+    "First Trimester" : "The first trimester is very important for your baby's development - it is the highest risk period for miscarriages and birth defects. During this time, the child's body structure and organ systems develop. Your body will also undergo many changes, and you may experience a variety of symptoms, including nausea, fatigue, breast tenderness, and frequent urination",
+    "Second Trimester": "The second trimester may produce a whole new set of symptoms, such as back pain, abdominal pain, leg cramps, constipation, and heartburn. However, you will likely experience decreased nausea and increased enegery level. You will also most likely feel your baby's first kicks!",
+    "Third Trimester": "The third trimester ends in the birth of your child - you are probably very excited, and nervous! You may experience symptoms like shortness of breath, hemorrhoids, urinary incontinence, varicose veins, and sleeping problems.",
+}
+
 In general, swelling of the hands, face, and eyes is not a cause for concern. But if these symptoms are severe or sudden or accompanied by a headache or blurred vision, you should see your healthcare provider. This can be an indication of serious conditions.
 Absence of, or slowing down of your baby's movements for more than 24 hours after 21 weeks may mean your baby is in distress. If your baby is moving less than normal, contact your healthcare provider
 It is important to try to avoid getting the flu. If you do get the flu, avoid interacting with other pregnant women. Instead, call your healthcare provider first!
