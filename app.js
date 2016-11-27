@@ -57,29 +57,51 @@ app.post('/message', function (req, res) {
     var messageRecieved = req.body.Body.trim().toLowerCase();
     var fromNum = req.body.From;
 
+    var isSubscribed = numbers.indexOf(fromNum) !== -1;
+
+    if (!isSubscribed) {
+        if ( messageRecieved.includes('subscribe') ) {
+            if( numbers.indexOf(fromNum) !== -1) {
+                resp.message('You already subscribed!');
+            } else {
+                resp.message("Thank you, you are now subscribed. Text 'karuna' at any point to unsubscribe.");
+
+                client.sendMessage({ to: fromNum, from: TWILIO_NUMBER, body: "Please respond with your " +
+                "first name, last name, age, and location (in that order). For example: John Smith 25 Toronto"});
+                
+                database.child(fromNum).set({"name": "unknown"});
+            }
+        } else {
+            resp.message('Welcome to SMaccesS Updates. Text "Subscribe" to receive updates.');
+        }
+        res.setHeader('Content-Type', 'text/xml');
+        res.end( resp.toString() );
+        return;
+    }
+
     if ( messageRecieved.includes('karuna') ) {
         if( numbers.indexOf(fromNum) === -1 ) {
-            resp.message("You can't unsubscribe from something you aren't subscribed too...");
+            resp.message("You are not subscribed to this service. Text subscribe if you wish to be.");
         } else {
-            resp.message("You're unsubscribed. How rude.");
+            resp.message("You're unsubscribed. Text subscribe at any point to re-subscribe.");
             database.child(fromNum).remove();
         }
-    } else if ( messageRecieved.includes('subscribe') ) {
-        if( numbers.indexOf(fromNum) !== -1) {
-            resp.message('You already subscribed!');
-        } else {
-            resp.message('Thank you, you are now subscribed.');
-            database.child(fromNum).set({"name": "unknown"});
-        }
-    } else {
-        resp.message('Welcome to SMaccesS Updates. Text "Subscribe" to receive updates.');
+        res.setHeader('Content-Type', 'text/xml');
+        res.end( resp.toString() );
+        return;
     }
+
+    messageRecieved = messageRecieved.split(' ');
+    database.child(fromNum).set({
+        "first name": messageRecieved[0],
+        "last name": messageRecieved[1],
+        "age": messageRecieved[2],
+        "location": messageRecieved[3]
+    });
 
     res.setHeader('Content-Type', 'text/xml');
     res.end( resp.toString() );
 });
-
-
 
 
 
@@ -88,7 +110,7 @@ var twilio = require('twilio');
 var client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
 var cronJob = require('cron').CronJob;
-var frequency = '* * * * *';
+var frequency = '0 * * * *';
 
 // extract the facts from facts.txt
 var fs = require('fs');
