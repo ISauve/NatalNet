@@ -1,47 +1,39 @@
 // scp -i SMaccesS_KP_.pem ~/Desktop/Makequality/app.js ec2-user@ec2-54-169-43-137.ap-southeast-1.compute.amazonaws.com:
 // ssh -i SMaccesS_KP_.pem ec2-user@ec2-54-169-43-137.ap-southeast-1.compute.amazonaws.com
 
-/*
- * Part 1: Send weekly messages
- */
 const TWILIO_NUMBER = '+15874092961';
 const TWILIO_AUTH_TOKEN = '938457cd6848d3b3d046fa1ca5bdda4a';
 const TWILIO_ACCOUNT_SID = 'AC54baa8e971fdca04f235b4c225b2d6ce';
 const FIREBASE_KEY = 'AIzaSyDX4YywVXbkppjzPtRfvDzwyC1AMU9BY2U';
 
-//require the Twilio module and create a REST client
-var twilio = require('twilio');
-var client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+// Initialize firebases
+var firebase = require('firebase');
+var config = {
+    apiKey: FIREBASE_KEY,
+    authDomain: "https://smaccess-226ac.firebaseapp.com",
+    databaseURL: "https://smaccess-226ac.firebaseio.com",
+    storageBucket: "gs://smaccess-226ac.appspot.com"
+};
 
-var cronJob = require('cron').CronJob;
-var frequency = '39 * * * *';
+firebase.initializeApp(config);
+var database = firebase.database().ref();
 
-// extract the facts from facts.txt
-var fs = require('fs');
-var facts = fs.readFileSync('facts.txt','utf-8');
-facts = facts.split("\n");
-var numbersTemp = ['+17806555108', '+1 289-924-1315', '+1 647-290-0836', '+1 403-988-9438'];
-
-// send messages out at the specified frequency
-var textJob = new cronJob( frequency, function() {
-    for( var i = 0; i < numbers.length; i++ ) {
-        client.sendMessage({
-            to: numbersTemp[i],
-            from: TWILIO_NUMBER,
-            body: facts[i]
-        }, function (err, data) {
-            if (!err) {
-                console.log(data.from);
-                console.log(data.body);
-            }
-        });
-    }
-}, null, true);
+var numbers = [];
+database.on('child_added', function(snapshot) {
+    numbers.push( snapshot.key );
+    console.log( 'Added number ' + snapshot.key );
+});
+database.on('child_removed', function(snapshot) {
+    var index = numbers.indexOf( snapshot.key );
+    numbers.splice(index, 1);
+    console.log('Removed number ' + snapshot.key );
+});
 
 
-/*
- * Part 2: Set up the server which will receive messages
- */
+
+
+
+// set up the express server
 var express = require('express'),
     app = express(),
     bodyParser = require('body-parser'),
@@ -59,33 +51,67 @@ var server = app.listen(process.env.PORT || 3000, function () {
     console.log('Server is running using express.js. Listening on port %d', server.address().port);
 });
 
-
-/*
- * Part 3: Connect to Firebase
- */
-
-// connect to the Firebase module
-var Firebase = require('firebase'),
-usersRef = new Firebase('{FIREBASEURL}/Users/');
-
-var numbers = [];
-usersRef.on('child_added', function(snapshot) {
-numbers.push( snapshot.val() );
-  console.log( 'Added number ' + snapshot.val() );
-});
-
 // tell express what to do when the /message route is requested
 app.post('/message', function (req, res) {
     var resp = new twilio.TwimlResponse();
-
     var messageRecieved = req.body.Body.trim().toLowerCase();
+    var fromNum = req.body.From;
 
-    if ( messageRecieved.includes('subscribe') ) {
-         resp.message('Thanks for subscribing!');
+    if ( messageRecieved.includes('karuna') ) {
+        if( numbers.indexOf(fromNum) === -1 ) {
+            resp.message("You can't unsubscribe from something you aren't subscribed too...");
+        } else {
+            resp.message("You're unsubscribed. How rude.");
+            database.child(fromNum).remove();
+        }
+    } else if ( messageRecieved.includes('subscribe') ) {
+        if( numbers.indexOf(fromNum) !== -1) {
+            resp.message('You already subscribed!');
+        } else {
+            resp.message('Thank you, you are now subscribed.');
+            database.child(fromNum).set({"name": "unknown"});
+        }
     } else {
-        resp.message(".... subscribe plz");
+        resp.message('Welcome to SMaccesS Updates. Text "Subscribe" to receive updates.');
     }
 
     res.setHeader('Content-Type', 'text/xml');
     res.end( resp.toString() );
 });
+
+
+
+
+
+//require the Twilio module and create a REST client
+var twilio = require('twilio');
+var client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+
+var cronJob = require('cron').CronJob;
+var frequency = '* * * * *';
+
+// extract the facts from facts.txt
+var fs = require('fs');
+var facts = fs.readFileSync('facts.txt','utf-8');
+facts = facts.split("\n");
+
+// send messages out at the specified frequency
+var textJob = new cronJob( frequency, function() {
+    for( var i = 0; i < numbers.length; i++ ) {
+
+        console.log("Texted " + numbers[i]);
+        client.sendMessage({
+            to: numbers[i],
+            from: TWILIO_NUMBER,
+            body: "You are still subscribed!"
+        }, function (err, data) {
+            if (!err) {
+                console.log(data.from);
+                console.log(data.body);
+            } else {
+                console.log(err);
+            }
+        });
+
+    }
+}, null, true);
