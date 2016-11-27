@@ -149,15 +149,11 @@ app.post('/message', function (req, res) {
     // send in form: keyword1 keyword2 keyword3 etc..... (this can be changed)
     database.child(fromNum + "/keywords").push( keywords.join(" ") );
 
-    // parse string for "child, baby, etc."
-    // tell them someone will be in contact with ____ period of time (-> gets sent to front end)
     resp.message("Your question has been logged and a healthcare worker will be in contact with you soon! " +
         "Please enjoy some basic automated information and remember that NatalNet is not an emergency service, " +
         "and responses may take some time." +
         "If you are in an emergency health situation, contact emergency first aid professionals.");
-                        //dont know if this entire long message is necessary
-    //how to communicate with the front end? idk
-    
+
     res.setHeader('Content-Type', 'text/xml');
     res.end( resp.toString() );
 });
