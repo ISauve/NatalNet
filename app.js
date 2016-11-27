@@ -32,6 +32,10 @@ database.on('child_added', function(snapshot) {
 database.on('child_removed', function(snapshot) {
     var index = numbers.indexOf( snapshot.key );
     numbers.splice(index, 1);
+
+    index = hasFilledSurvey.indexOf( snapshot.key );
+    hasFilledSurvey.splice(index, 1);
+
     console.log('Removed number ' + snapshot.key );
 });
 database.on('child_changed', function( snapshot ) {
@@ -111,12 +115,12 @@ app.post('/message', function (req, res) {
         var date = new Date().toJSON().slice(0,10);
 
         database.child(fromNum).set({
-            "months along": messageRecieved[0],
-            "first name": messageRecieved[1],
-            "last name": messageRecieved[2],
+            "months_along": messageRecieved[0],
+            "first_name": messageRecieved[1],
+            "last_name": messageRecieved[2],
             "age": messageRecieved[3],
             "location": address.join(' '),
-            "signup date": date
+            "signup_date": date
         });
 
         resp.message("Thanks for signing up!");
@@ -128,14 +132,13 @@ app.post('/message', function (req, res) {
     // If they are not subscribing, unsubscribing, or filling out their entrance survey
     // assume they are asking a question
 
-    // add the question to their file
-    database.child(fromNum + "/questions").push(messageRecieved);
+    var questionRef = database.child(fromNum + "/questions/").push("new node");
 
     // parse string looking for keywords
     var fs = require('fs');
     var json = JSON.parse( fs.readFileSync('List_of_Keywords.json','utf-8') );
 
-    //  add keyword(s) to file
+    // fetch the keywords
     var keywords = [];
     for (var key in json) {
         if (json.hasOwnProperty(key)) {
@@ -147,8 +150,28 @@ app.post('/message', function (req, res) {
         }
     }
 
-    // send in form: keyword1 keyword2 keyword3 etc..... (this can be changed)
-    database.child(fromNum + "/keywords").push( keywords.join(" ") );
+    // fetch any multimedia
+    var mediaURLS = [];
+    var msid = req.body.MessageSid;
+    if (msid[0] === 'M') {
+        if ( req.body.MediaUrl0 ) mediaURLS.push( req.body.MediaUrl0  );
+        if ( req.body.MediaUrl1 ) mediaURLS.push( req.body.MediaUrl1  );
+        if ( req.body.MediaUrl2 ) mediaURLS.push( req.body.MediaUrl2  );
+        if ( req.body.MediaUrl3 ) mediaURLS.push( req.body.MediaUrl3  );
+        if ( req.body.MediaUrl4 ) mediaURLS.push( req.body.MediaUrl4  );
+        if ( req.body.MediaUrl5 ) mediaURLS.push( req.body.MediaUrl5  );
+        if ( req.body.MediaUrl6 ) mediaURLS.push( req.body.MediaUrl6  );
+        if ( req.body.MediaUrl7 ) mediaURLS.push( req.body.MediaUrl7  );
+        if ( req.body.MediaUrl8 ) mediaURLS.push( req.body.MediaUrl8  );
+        if ( req.body.MediaUrl9 ) mediaURLS.push( req.body.MediaUrl9  );
+    }
+
+    // append the question and all information
+    database.child(fromNum + "/questions/" + questionRef.key ).set({
+        "question": messageRecieved,
+        "keywords":  keywords.join(" "),
+        "media": mediaURLS.join(" ")
+    });
 
     resp.message("Your question has been logged and a healthcare worker will be in contact with you soon! " +
         "Please enjoy some basic automated information and remember that NatalNet is not an emergency service, " +
@@ -158,11 +181,6 @@ app.post('/message', function (req, res) {
     res.setHeader('Content-Type', 'text/xml');
     res.end( resp.toString() );
 });
-
-
-
-
-
 
 //require the Twilio module and create a REST client
 var twilio = require('twilio');
@@ -196,5 +214,4 @@ var textJob = new cronJob( frequency, function() {
 }, null, true);
 
 
-// Communicate with the front end
-
+// recieve requests from the front end (HCWs answering questions)
