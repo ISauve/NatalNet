@@ -98,5 +98,6 @@ button.patientpage, button.patientpage:hover, button.patientpage:link, button.pa
 	border: none;
     background-color: transparent;
     text-align: left;
+	padding-left: 0px;
 
 }
