@@ -19,25 +19,27 @@ firebase.initializeApp(config);
 var database = firebase.database().ref();
 
 var numbers = [];
+var hasFilledSurvey = [];
 database.on('child_added', function(snapshot) {
     numbers.push( snapshot.key );
     console.log( 'Added number ' + snapshot.key );
+
+    if ( snapshot.hasChild("age") ) {
+        hasFilledSurvey.push(snapshot.key);
+        console.log(snapshot.key + " has filled out her entrance survey");
+    }
 });
 database.on('child_removed', function(snapshot) {
     var index = numbers.indexOf( snapshot.key );
     numbers.splice(index, 1);
     console.log('Removed number ' + snapshot.key );
 });
-
-var hasFilledSurvey = [];
-database.on('child_added', function(snapshot) {
-    if ( snapshot.hasChild("age") ) {
+database.on('child_changed', function( snapshot ) {
+    if ( snapshot.hasChild("age") && hasFilledSurvey.indexOf(snapshot.key) === -1) {
         hasFilledSurvey.push( snapshot.key );
         console.log(snapshot.key + " has filled out her entrance survey");
     }
 });
-
-
 
 // set up the express server
 var express = require('express'),
@@ -99,9 +101,6 @@ app.post('/message', function (req, res) {
     }
 
     if (hasFilledSurvey.indexOf(fromNum) === -1) {
-
-        console.log("ERROR ERROR ERROR ERROR");
-
         messageRecieved = messageRecieved.split(' ');
 
         var address = [];
@@ -120,12 +119,14 @@ app.post('/message', function (req, res) {
             "signup date": date
         });
 
-        client.sendMessage({to: fromNum, from: TWILIO_NUMBER, body: "Thanks for signing up!"});
-
+        resp.message("Thanks for signing up!");
         res.setHeader('Content-Type', 'text/xml');
         res.end( resp.toString() );
         return;
     }
+
+    // If they are not subscribing, unsubscribing, or filling out their entrance survey
+    // assume they are asking a question
 
     // add the question to their file
     database.child(fromNum + "/questions").push(messageRecieved);
@@ -160,6 +161,9 @@ app.post('/message', function (req, res) {
 
 
 
+
+
+
 //require the Twilio module and create a REST client
 var twilio = require('twilio');
 var client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
@@ -175,8 +179,6 @@ facts = facts.split("\n");
 // send messages out at the specified frequency
 var textJob = new cronJob( frequency, function() {
     for( var i = 0; i < numbers.length; i++ ) {
-
-        console.log("Texted " + numbers[i]);
         client.sendMessage({
             to: numbers[i],
             from: TWILIO_NUMBER,
