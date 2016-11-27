@@ -29,7 +29,13 @@ database.on('child_removed', function(snapshot) {
     console.log('Removed number ' + snapshot.key );
 });
 
-
+var hasFilledSurvey = [];
+database.on('child_added', function(snapshot) {
+    if ( snapshot.hasChild("age") ) {
+        hasFilledSurvey.push( snapshot.key );
+        console.log(snapshot.key + " has filled out her entrance survey");
+    }
+});
 
 
 
@@ -67,12 +73,13 @@ app.post('/message', function (req, res) {
                 resp.message("Thank you, you are now subscribed. Text 'karuna' at any point to unsubscribe.");
 
                 client.sendMessage({ to: fromNum, from: TWILIO_NUMBER, body: "Please respond with your " +
-                "first name, last name, age, and location (in that order). For example: John Smith 25 Toronto"});
-                
+                "how far along you are (approx. months), first name, last name, age, and location (in that order). " +
+                "For example: 3 John Smith 25 Toronto"});
+
                 database.child(fromNum).set({"name": "unknown"});
             }
         } else {
-            resp.message('Welcome to SMaccesS Updates. Text "Subscribe" to receive updates.');
+            resp.message('Welcome to NatalNet. Text "Subscribe" to receive weekly personalized pregnancy information.');
         }
         res.setHeader('Content-Type', 'text/xml');
         res.end( resp.toString() );
@@ -91,14 +98,66 @@ app.post('/message', function (req, res) {
         return;
     }
 
-    messageRecieved = messageRecieved.split(' ');
-    database.child(fromNum).set({
-        "first name": messageRecieved[0],
-        "last name": messageRecieved[1],
-        "age": messageRecieved[2],
-        "location": messageRecieved[3]
-    });
+    if (hasFilledSurvey.indexOf(fromNum) === -1) {
 
+        console.log("ERROR ERROR ERROR ERROR");
+
+        messageRecieved = messageRecieved.split(' ');
+
+        var address = [];
+        for (var i=4; i<messageRecieved.length; i++) {
+            address.push( messageRecieved[i] );
+        }
+
+        var date = new Date().toJSON().slice(0,10);
+
+        database.child(fromNum).set({
+            "months along": messageRecieved[0],
+            "first name": messageRecieved[1],
+            "last name": messageRecieved[2],
+            "age": messageRecieved[3],
+            "location": address.join(' '),
+            "signup date": date
+        });
+
+        client.sendMessage({to: fromNum, from: TWILIO_NUMBER, body: "Thanks for signing up!"});
+
+        res.setHeader('Content-Type', 'text/xml');
+        res.end( resp.toString() );
+        return;
+    }
+
+    // add the question to their file
+    database.child(fromNum + "/questions").push(messageRecieved);
+
+    // parse string looking for keywords
+    var fs = require('fs');
+    var json = JSON.parse( fs.readFileSync('List_of_Keywords.json','utf-8') );
+
+    //  add keyword(s) to file
+    var keywords = [];
+    for (var key in json) {
+        if (json.hasOwnProperty(key)) {
+            if( messageRecieved.includes(key) ) {
+                var text = json[key];
+                if (text) client.sendMessage({to: fromNum, from: TWILIO_NUMBER, body: text});
+                keywords.push( key );
+            }
+        }
+    }
+
+    // send in form: keyword1 keyword2 keyword3 etc..... (this can be changed)
+    database.child(fromNum + "/keywords").push( keywords.join(" ") );
+
+    // parse string for "child, baby, etc."
+    // tell them someone will be in contact with ____ period of time (-> gets sent to front end)
+    resp.message("Your question has been logged and a healthcare worker will be in contact with you soon! " +
+        "Please enjoy some basic automated information and remember that NatalNet is not an emergency service, " +
+        "and responses may take some time." +
+        "If you are in an emergency health situation, contact emergency first aid professionals.");
+                        //dont know if this entire long message is necessary
+    //how to communicate with the front end? idk
+    
     res.setHeader('Content-Type', 'text/xml');
     res.end( resp.toString() );
 });
@@ -137,3 +196,7 @@ var textJob = new cronJob( frequency, function() {
 
     }
 }, null, true);
+
+
+// Communicate with the front end
+
