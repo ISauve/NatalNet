@@ -196,6 +196,15 @@ facts = facts.split("\n");
 
 // send messages out at the specified frequency
 var textJob = new cronJob( frequency, function() {
+    /*
+    // To group women into categories based on what trimester they're in:
+    rel_con_date = int(month(signup date)) - int(months along)
+
+    rel_con_date <= first_trimester < rel_con_date+3
+    rel_con_date+3 <= second_trimester < rel_con_date+6
+    rel_con_date+6 <= third_trimester
+     */
+
     for( var i = 0; i < numbers.length; i++ ) {
         client.sendMessage({
             to: numbers[i],
@@ -214,4 +223,28 @@ var textJob = new cronJob( frequency, function() {
 }, null, true);
 
 
-// recieve requests from the front end (HCWs answering questions)
+// receive requests from the front end - relaw HCWs answers to their recipients
+app.post('/answers', function (req, res) {
+
+
+
+    // configure this based on sent JSON
+    var number = req.number;
+    var message = req.body;
+
+
+
+
+    client.sendMessage({
+        to: number,
+        from: TWILIO_NUMBER,
+        body: message
+    }, function (err, data) {
+        if (!err) {
+            console.log(data.from);
+            console.log(data.body);
+        } else {
+            console.log(err);
+        }
+    });
+});
