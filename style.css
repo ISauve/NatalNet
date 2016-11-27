@@ -1,0 +1,102 @@
+h1{
+	font-family: 'Maitree', serif;
+	font-weight: bold;
+	font-size: 18px;
+	color: black;
+	padding: 0px;
+	margin: 0px;
+}
+h1 span{
+	color: #CC2B19;
+	font-family: 'Maitree', serif;
+	font-weight: bold;
+	font-size: 18px;
+	padding: 0px;
+	margin: 0px;
+}
+span{
+	font-family: 'Open-Sans', sans-serif;
+	font-size: 14px;
+}
+.navbar-brand{
+	font-family: 'Maitree', serif;
+	font-weight: bold;
+}
+.card{
+	background: #f2f2f2;
+	padding: 15px;
+	box-shadow: 2px 2px 2px #888888;
+	border-radius: 5px;
+}
+.date{
+	color: #828282;
+}
+.card a{
+	color: #4ECDC4;
+	text-decoration: none;
+}
+button.answer{
+	background-color: #4ECDC4;
+	border: none;
+    color: white;
+    padding: 5px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 8px;
+
+}
+button.risk{
+	background-color: #CC2B19;
+	border: none;
+    color: white;
+    padding: 5px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 8px;
+
+}
+button.norisk{
+	background-color: #828282;
+	border: none;
+    color: white;
+    padding: 5px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    border-radius: 8px;
+
+}
+span.risk{
+	color: #CC2B19;
+}
+td{
+	padding: 5px;
+}
+.field{
+	font-weight: bold;
+}
+button.patient{
+	border: none;
+    color: #4ECDC4;
+    text-align: center;
+    text-decoration: none;
+    background-color: transparent;
+
+}
+button.patient:hover, button.patient:link, button.patient:active, button.patient:visited{
+	border: none;
+    color: #278B85;
+    text-align: center;
+    text-decoration: none;
+    background-color: transparent;
+
+}
+
+button.patientpage, button.patientpage:hover, button.patientpage:link, button.patientpage:active, button.patientpage:visited{
+	border: none;
+    background-color: transparent;
+    text-align: left;
+
+}
