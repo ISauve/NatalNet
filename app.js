@@ -76,7 +76,7 @@ app.post('/message', function (req, res) {
             if( numbers.indexOf(fromNum) !== -1) {
                 resp.message('You already subscribed!');
             } else {
-                resp.message("Thank you, you are now subscribed. Text 'karuna' at any point to unsubscribe.");
+                resp.message("Thank you, you are now subscribed. Text 'leave' at any point to unsubscribe.");
 
                 client.sendMessage({ to: fromNum, from: TWILIO_NUMBER, body: "Please respond with your " +
                 "how far along you are (approx. months), first name, last name, age, and location (in that order). " +
@@ -92,7 +92,7 @@ app.post('/message', function (req, res) {
         return;
     }
 
-    if ( messageRecieved.includes('karuna') ) {
+    if ( messageRecieved.includes('leave') ) {
         if( numbers.indexOf(fromNum) === -1 ) {
             resp.message("You are not subscribed to this service. Text subscribe if you wish to be.");
         } else {
@@ -123,7 +123,8 @@ app.post('/message', function (req, res) {
             "signup_date": date
         });
 
-        resp.message("Thanks for signing up!");
+        resp.message("Thanks for signing up! Feel free to ask any questions you may have regarding you or your " +
+            "babies health. You may include pictures or video if it helps. Please note this is not an emergency service.");
         res.setHeader('Content-Type', 'text/xml');
         res.end( resp.toString() );
         return;
@@ -174,10 +175,10 @@ app.post('/message', function (req, res) {
     });
 
     resp.message("Your question has been logged and a healthcare worker will be in contact with you soon! " +
-        "Please enjoy some basic automated information and remember that NatalNet is not an emergency service, " +
-        "and responses may take some time." +
+        "Automated information may follow depending on the content of your question and remember that NatalNet " +
+        "is not an emergency service, and responses may take some time." +
         "If you are in an emergency health situation, contact emergency first aid professionals.");
-
+    
     res.setHeader('Content-Type', 'text/xml');
     res.end( resp.toString() );
 });
@@ -196,13 +197,13 @@ facts = facts.split("\n");
 
 // send messages out at the specified frequency
 var textJob = new cronJob( frequency, function() {
-    /*
-    // To group women into categories based on what trimester they're in:
-    rel_con_date = int(month(signup date)) - int(months along)
 
-    rel_con_date <= first_trimester < rel_con_date+3
-    rel_con_date+3 <= second_trimester < rel_con_date+6
-    rel_con_date+6 <= third_trimester
+    /*
+     // To group women into categories based on what trimester they're in:
+     rel_con_date = int(month(signup date)) - int(months along)
+     rel_con_date <= first_trimester < rel_con_date+3
+     rel_con_date+3 <= second_trimester < rel_con_date+6
+     rel_con_date+6 <= third_trimester
      */
 
     for( var i = 0; i < numbers.length; i++ ) {
@@ -223,17 +224,11 @@ var textJob = new cronJob( frequency, function() {
 }, null, true);
 
 
-// receive requests from the front end - relaw HCWs answers to their recipients
+// receive requests from the front end - relay HCWs answers to their recipients
 app.post('/answers', function (req, res) {
-
-
-
     // configure this based on sent JSON
-    var number = req.number;
-    var message = req.body;
-
-
-
+    var message = req.body.answer;
+    var number = req.body.phoneNumber;
 
     client.sendMessage({
         to: number,

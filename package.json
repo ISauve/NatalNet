@@ -13,9 +13,9 @@
   "author": "Isabelle Sauve, Ashley Attard, Mackenzie Wilson, Victoria Canning-Choi, Namrata Sharma",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/ISauve/Makequality/issues"
+    "url": "https://github.com/ISauve/NatalNet/issues"
   },
-  "homepage": "https://github.com/ISauve/Makequality#readme",
+  "homepage": "https://github.com/ISauve/NatalNet#readme",
   "dependencies": {
     "body-parser": "^1.15.2",
     "cron": "^1.1.1",
