@@ -1,6 +1,5 @@
 // scp -i SMaccesS_KP_.pem ~/Desktop/NatalNet/index.html ec2-user@ec2-54-169-43-137.ap-southeast-1.compute.amazonaws.com: ../../.   ./var/www/html/
 // ssh -i SMaccesS_KP_.pem ec2-user@ec2-54-169-43-137.ap-southeast-1.compute.amazonaws.com
-// scp ~/Desktop/NatalNet/index.html  root@104.236.17.126: ../var/www/html
 
 const TWILIO_NUMBER = '+15874092961';
 const TWILIO_AUTH_TOKEN = '938457cd6848d3b3d046fa1ca5bdda4a';

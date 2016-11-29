@@ -67,18 +67,22 @@ for (var i = 0; i < Object.keys(obj).length; i++){
         }
     }
 
+    function toTitleCase(str) {
+        return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+    }
+
     // append all the information to a card for the person
     var raw = document.createElement('div');
     raw.innerHTML =
         "<div class=\"card\">" +
-        "<button type=\"button\" class=\"btn patientpage\" data-toggle=\"modal\" data-target=\"#" + info.first_name + "\">" +
-        "<h1>" + info.first_name + " " + info.last_name + " " +
+        "<button type=\"button\" class=\"btn patientpage\" data-toggle=\"modal\" data-target=\"#" + toTitleCase(info.first_name) + "\">" +
+        "<h1>" + toTitleCase(info.first_name) + " " + toTitleCase(info.last_name) + " " +
         "<span class=\"date\">" + info.months_along + " Months </span>" +
         "<span class=\"glyphicon glyphicon-calendar date\" aria-hidden=\"true\"> " +
         "</h1>" +
         "</button></div>" +
         "<br>"+
-        "<div class=\"modal fade\" tabinde  x=\"-1\" role=\"dialog\" aria-labelledby=\"mySmallModalLabel\" aria-hidden=\"true\" id=\""+info.first_name+"\">" +
+        "<div class=\"modal fade\" tabinde  x=\"-1\" role=\"dialog\" aria-labelledby=\"mySmallModalLabel\" aria-hidden=\"true\" id=\""+ toTitleCase(info.first_name)+"\">" +
         "<div class=\"modal-dialog modal-lg\">" +
         "<div class=\"modal-content\">" +
         "<div class=\"card info\">" +
@@ -90,7 +94,7 @@ for (var i = 0; i < Object.keys(obj).length; i++){
         "<span class=\"field\">Name:</span>" +
         "</td>" +
         "<td width=\"40%\">" +
-        "<span>" + info.first_name + " " + info.last_name + "</span><" +
+        "<span>" + toTitleCase(info.first_name) + " " + toTitleCase(info.last_name) + "</span><" +
         "/td>" +
         "<td width=\"10%\">" +
         "<span class=\"field\">Age:</span>" +
@@ -103,7 +107,7 @@ for (var i = 0; i < Object.keys(obj).length; i++){
         "<span class=\"field\">Location:</span>" +
         "</td>" +
         "<td>" +
-        "<span>" + info.location + "</span>" +
+        "<span>" + toTitleCase(info.location) + "</span>" +
         "</td>" +
         "<td>" +
         "<span class=\"field\">Phone:</span>" +
