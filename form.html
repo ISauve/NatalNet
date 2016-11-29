@@ -5,11 +5,24 @@
     <title>Title</title>
 </head>
 <body>
-    <form action="http://4d5107db.ngrok.io/answers" method="post">
-        What is the answer to this question? <br>
-        <textarea name="answer" rows="10" cols="30"></textarea><br>
-        Enter the phone number to respond to:<input type="text" name="phoneNumber"><br>
-        <input type="submit" value="Submit">
-    </form>
 </body>
+
+<script>
+    var URL = window.location.href;
+    var indexOfNum = URL.indexOf('=') + 1;
+    var fromNum = [];
+    for (var i=indexOfNum; i < URL.length; i++) {
+        fromNum.push(URL[i]);
+    }
+    fromNum = fromNum.join("");
+    var form = document.createElement('div');
+    form.innerHTML =
+            "<form action='http://sample-env-3.vw7inwxm6c.ap-southeast-1.elasticbeanstalk.com/answers' method='post'>" +
+            "What is the answer to this question? <br> " +
+            "<textarea name='answer' rows='10' cols='30'></textarea><br>" +
+            "Phone number to respond to:<input type='text' name='phoneNumber' value='"+ fromNum + "'><br>" +
+            " <input type='submit' value='Submit'>" +
+            "</form>";
+    document.body.appendChild(form);
+</script>
 </html>
