@@ -1,5 +1,6 @@
-// scp -i SMaccesS_KP_.pem ~/Desktop/Makequality/app.js ec2-user@ec2-54-169-43-137.ap-southeast-1.compute.amazonaws.com:
+// scp -i SMaccesS_KP_.pem ~/Desktop/NatalNet/index.html ec2-user@ec2-54-169-43-137.ap-southeast-1.compute.amazonaws.com: ../../.   ./var/www/html/
 // ssh -i SMaccesS_KP_.pem ec2-user@ec2-54-169-43-137.ap-southeast-1.compute.amazonaws.com
+// scp ~/Desktop/NatalNet/index.html  root@104.236.17.126: ../var/www/html
 
 const TWILIO_NUMBER = '+15874092961';
 const TWILIO_AUTH_TOKEN = '938457cd6848d3b3d046fa1ca5bdda4a';
@@ -188,7 +189,7 @@ var twilio = require('twilio');
 var client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
 
 var cronJob = require('cron').CronJob;
-var frequency = '0 * * * *';
+var frequency = '0 0 1 1 *';
 
 // extract the facts from facts.txt
 var fs = require('fs');
@@ -210,7 +211,7 @@ var textJob = new cronJob( frequency, function() {
         client.sendMessage({
             to: numbers[i],
             from: TWILIO_NUMBER,
-            body: "You are still subscribed!"
+            body: "Happy new year!"
         }, function (err, data) {
             if (!err) {
                 console.log(data.from);
