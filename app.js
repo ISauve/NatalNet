@@ -6,8 +6,11 @@ const TWILIO_AUTH_TOKEN = '938457cd6848d3b3d046fa1ca5bdda4a';
 const TWILIO_ACCOUNT_SID = 'AC54baa8e971fdca04f235b4c225b2d6ce';
 const FIREBASE_KEY = 'AIzaSyDX4YywVXbkppjzPtRfvDzwyC1AMU9BY2U';
 
-// Initialize firebases
 var firebase = require('firebase');
+var twilio = require('twilio');
+var client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
+
+// Initialize firebases
 var config = {
     apiKey: FIREBASE_KEY,
     authDomain: "https://smaccess-226ac.firebaseapp.com",
@@ -45,7 +48,8 @@ database.on('child_changed', function( snapshot ) {
     }
 });
 
-// set up the express server
+
+// set up Express server
 var express = require('express'),
     app = express(),
     bodyParser = require('body-parser'),
@@ -63,11 +67,11 @@ var server = app.listen(process.env.PORT || 3000, function () {
     console.log('Server is running using express.js. Listening on port %d', server.address().port);
 });
 
-// tell express what to do when the /message route is requested
-app.post('/message', function (req, res) {
+// tell the server that when a person sends a request to the /message endpoint, it should run this function
+app.post('/message', function (request, res) {
     var resp = new twilio.TwimlResponse();
-    var messageRecieved = req.body.Body.trim().toLowerCase();
-    var fromNum = req.body.From;
+    var messageRecieved = request.body.Body.trim().toLowerCase();
+    var fromNum = request.body.From;
 
     var isSubscribed = numbers.indexOf(fromNum) !== -1;
 
@@ -178,57 +182,16 @@ app.post('/message', function (req, res) {
         "Automated information may follow depending on the content of your question and remember that NatalNet " +
         "is not an emergency service, and responses may take some time." +
         "If you are in an emergency health situation, contact emergency first aid professionals.");
-    
+
     res.setHeader('Content-Type', 'text/xml');
     res.end( resp.toString() );
 });
 
-//require the Twilio module and create a REST client
-var twilio = require('twilio');
-var client = twilio(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN);
-
-var cronJob = require('cron').CronJob;
-var frequency = '0 0 1 1 *';
-
-// extract the facts from facts.txt
-var fs = require('fs');
-var facts = fs.readFileSync('facts.txt','utf-8');
-facts = facts.split("\n");
-
-// send messages out at the specified frequency
-var textJob = new cronJob( frequency, function() {
-
-    /*
-     // To group women into categories based on what trimester they're in:
-     rel_con_date = int(month(signup date)) - int(months along)
-     rel_con_date <= first_trimester < rel_con_date+3
-     rel_con_date+3 <= second_trimester < rel_con_date+6
-     rel_con_date+6 <= third_trimester
-     */
-
-    for( var i = 0; i < numbers.length; i++ ) {
-        client.sendMessage({
-            to: numbers[i],
-            from: TWILIO_NUMBER,
-            body: "Happy new year!"
-        }, function (err, data) {
-            if (!err) {
-                console.log(data.from);
-                console.log(data.body);
-            } else {
-                console.log(err);
-            }
-        });
-
-    }
-}, null, true);
-
 
 // receive requests from the front end - relay HCWs answers to their recipients
-app.post('/answers', function (req, res) {
-    // configure this based on sent JSON
-    var message = req.body.answer;
-    var number = req.body.phoneNumber;
+app.post('/answers', function (request, response) {
+    var message = request.body.answer;
+    var number = request.body.phoneNumber;
 
     client.sendMessage({
         to: number,
